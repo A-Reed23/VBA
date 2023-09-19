@@ -1,0 +1,130 @@
+Sub NTry()
+
+'worksheet creation
+Dim ws As Worksheet
+For Each ws In Worksheets
+    LSTRow = ws.Cells(Rows.count, 1).End(xlUp).Row
+
+'variable to store ticker sym.
+	Dim sym As String
+'colum lable with column insert
+	ws.Range("K1").EntireColumn.Insert
+	ws.Cells(1, 11).Value = "<ticker>"
+
+'working cell value
+	Dim NXT_Cell As String
+'ticker list (counter for symbol list)
+	Dim LST_Cell As Double
+	LST_Cell = 2
+
+'volume counter with column insert
+	Dim totVol As Double
+	ws.Range("L1:N1").EntireColumn.Insert
+	ws.Cells(1, 12).Value = "<Total_Vol>"
+
+'creat price function
+'annual percent change
+	Dim price As Double
+	Dim fprice As Double
+	Dim lprice As Double
+
+'annual change With cloumn insert
+	Dim priDiff As Double
+	ws.Cells(1, 14).Value = "<absolute price change>"
+
+'annual PERCENT change and column insert
+	ws.Cells(1, 13).Value = "<year end percent change>"
+
+
+'last row finder
+	Dim LRow As Double
+	LRow = Cells(Rows.count, 1).End(xlUp).Row
+
+'Intial values before going in to loop
+    	sym = ws.Cells(2, 1).Value
+    	fprice = ws.Cells(2, 3).Value
+    
+    	
+
+		For i = 3 To LRow
+    			NXT_Cell = ws.Cells(i, 1).Value
+    
+        			If NXT_Cell <> sym Then
+    'year end price
+            			lprice = ws.Cells(i - 1, 6).Value
+    'final price difference calc
+            			priDiff = fprice - lprice
+            			ws.Cells(LST_Cell, 14).Value = priDiff
+ 				      price = priDiff / fprice
+        
+       'percent change
+            			ws.Cells(LST_Cell, 13).Value = price
+        
+       'reseting variables for loop
+
+            			price = 0
+            			totVol = 0
+            			LST_Cell = LST_Cell + 1
+            			sym = NXT_Cell
+        'symbol list add ticker
+            			ws.Cells(LST_Cell, 11).Value = sym
+        'start volume calculation
+            			totVol = ws.Cells(i, 7).Value
+            			ws.Cells(LST_Cell, 12) = totVol
+        'start price calc
+            			fprice = ws.Cells(i, 3).Value
+           
+        
+        			Else
+            			totVol = ws.Cells(i, 7).Value + totVol
+            			ws.Cells(LST_Cell, 12).Value = totVol
+        		End If
+ 
+		Next i
+'annual change, color cells red if negative, green if positive
+    	For j = 1 To LRow
+      		  If ws.Cells(j, 13).Value < 0 Then
+             		ws.Cells(j, 13).Interior.ColorIndex = 3
+         		  ElseIf ws.Cells(j, 13).Value > 0 Then
+            		ws.Cells(j, 13).Interior.ColorIndex = 4
+        		End If
+ 
+        
+        	End If
+    Next j
+
+
+
+
+'columb title, ticker
+	ws.Range("q1").Value = "Ticker"
+	ws.Range("r1").Value = "% Change"
+	'row lable for min value
+	ws.Cells(2, 16).Value = "Greatest % loss"
+
+'find min value in percent change
+	ws.Cells(2, 18).Value = Application.WorksheetFunction.Min(ws.Range("M:M").Value)
+
+'find symbol that goes with it
+	ws.Cells(2, 17).Value = Application.WorksheetFunction.Index(ws.Range("K:K").Value, Application.WorksheetFunction.Match(ws.Cells(2, 18).Value, ws.Range("M:M").Value, 0))
+
+
+'row lable for max value
+	ws.Cells(3, 16).Value = "Greatest % Gain"
+'find min value in percent change
+	ws.Cells(3, 18).Value = Application.WorksheetFunction.Max(ws.Range("M:M").Value)
+'find symbol that goes with it
+	ws.Cells(3, 17).Value = Application.WorksheetFunction.Index(ws.Range("K:K").Value, Application.WorksheetFunction.Match(ws.Cells(3, 18).Value, ws.Range("M:M").Value, 0))
+
+'row for volume change
+	ws.Cells(4, 16).Value = "Greatest total Volume"
+'find min value in percent change
+	ws.Cells(4, 18).Value = Application.WorksheetFunction.Max(ws.Range("L:L").Value)
+'find symbol that goes with it
+	ws.Cells(4, 17).Value = Application.WorksheetFunction.Index(ws.Range("K:K").Value, Application.WorksheetFunction.Match(ws.Cells(4, 18).Value, ws.Range("L:L").Value, 0))
+
+
+Next ws
+
+
+End Sub
